@@ -1,0 +1,4 @@
+venv/
+__pycache__/
+.env
+task_manager.code-workspace
