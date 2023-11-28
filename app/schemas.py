@@ -22,21 +22,21 @@ class getTokenData(BaseModel):
         from_attributes: True
 
 
-# Group schemas
+# User groups schemas
 
-class getOwnerInfo(BaseModel):
-    username: str
-    email: EmailStr
-    class Config:
-        from_attributes: True
-
-
-class returnUserGroupInformation(BaseModel):
+class returnUserGroupInformation(BaseModel): #Schema of model UserGroupsTable for returnFullCurrentUserInformation schema
+    id: int
     group_name: str
     group_creation: datetime.datetime
-    user_group_owner: getOwnerInfo
-    class Config:
-        from_attributes: True
+
+
+# Task group schemas
+
+class returnTaskGroupInformation(BaseModel): # Schema of model TaskGroupsTable for returnFullCurrentUserInformation schema
+    id: int
+    group_name: str
+    group_creation: datetime.datetime
+
 
 
 # User schemas
@@ -82,8 +82,14 @@ class returnCurrentUser(BaseModel):
     user_creation: datetime.datetime
     valid_email: bool
     user_state: bool
-    group_member: Optional[List[returnUserGroupInformation]] = None
- 
+
+    class Config:
+        from_attributes: True
+
+
+class returnFullCurrentUserInformation(returnCurrentUser):
+    owned_user_groups: Optional[List[returnUserGroupInformation]] = None
+    owned_task_groups: Optional[List[returnTaskGroupInformation]] = None
     class Config:
         from_attributes: True
     

@@ -8,16 +8,45 @@ dec_base = declarative_base()
 
 # Association tables
 
+# user_group_roles = Table("user_group_roles", Base.metadata,
+#                     Column("id", Integer, primary_key=True),
+#                     Column("role", String, nullable=False)) 
 
-group_roles = Table("group_roles", Base.metadata,
-                    Column("id", Integer, primary_key=True),
-                    Column("role", String, nullable=False)) 
+
+# user_group_members = Table("user_group_members", Base.metadata, 
+#                            Column("user_id", Integer, ForeignKey("users.id"), primary_key=True), 
+#                            Column("group_id", Integer, ForeignKey("user_groups.id"), primary_key=True),
+#                            Column("role_id", Integer, ForeignKey("user_group_roles.id"), nullable=False))
+
+task_assignments = Table("task_assignments", Base.metadata,
+                         Column("task_id", Integer, ForeignKey("tasks.id"), primary_key=True),
+                         Column("task_group_id", Integer, ForeignKey("task_groups.id"), primary_key=True))
 
 
-user_group_members = Table("user_group_members", Base.metadata, 
-                           Column("user_id", Integer, ForeignKey("users.id"), primary_key=True), 
-                           Column("group_id", Integer, ForeignKey("user_groups.id"), primary_key=True),
-                           Column("role_id", Integer, ForeignKey("group_roles.id"), nullable=False))
+user_groups_task_groups = Table("user_groups_task_groups", Base.metadata, 
+                                Column("user_group_id", Integer, ForeignKey("user_groups.id"), primary_key=True),
+                                Column("task_group_id", Integer, ForeignKey("task_groups.id"), primary_key=True))
+
+
+class GroupRoles(Base):
+    __tablename__ = "user_group_roles"
+    
+    id = Column(Integer, primary_key=True)
+    role = Column(String, nullable=False)
+
+    user = relationship("UserGroupMembersAssociationTable", back_populates="user_role")
+
+
+class UserGroupMembersAssociationTable(Base):
+    __tablename__ = "user_group_members"
+
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    group_id = Column(Integer, ForeignKey("user_groups.id"), primary_key=True)
+    role_id = Column(Integer, ForeignKey("user_group_roles.id"), nullable=False)
+
+    member = relationship("UsersTable", back_populates="groups_member")
+    user_group = relationship("UserGroupsTable", back_populates="members")
+    user_role = relationship("GroupRoles", back_populates="user")
 
 
 # Main tables
@@ -32,12 +61,10 @@ class UsersTable(Base):
     valid_email = Column(Boolean, nullable=False, server_default=text("FALSE"))  # email validation # user_state -> True: Active, False: Inactive (For irreversible user deletion)
     user_state = Column(Boolean, nullable=False, server_default=text("TRUE"))
 
-    tasks = relationship("TasksTable", back_populates="task_owner") 
-    user_group = relationship("UserGroupsTable", back_populates="user_group_owner")
-    task_group = relationship("TaskGroupsTable", back_populates="task_group_owner")
-    
-    #secondary relationships
-    group_member = relationship("UserGroupsTable", secondary=user_group_members, back_populates="members")
+    owned_user_groups = relationship("UserGroupsTable", back_populates="group_owner")
+    groups_member = relationship("UserGroupMembersAssociationTable", back_populates="member")
+    owned_task_groups = relationship("TaskGroupsTable", back_populates="group_owner")
+    owned_tasks = relationship("TasksTable", back_populates="task_owner") 
 
 
 class UserGroupsTable(Base):
@@ -49,10 +76,11 @@ class UserGroupsTable(Base):
     group_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     group_owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    user_group_owner = relationship("UsersTable", back_populates="user_group")
+    group_owner = relationship("UsersTable", back_populates="owned_user_groups")
+    members = relationship("UserGroupMembersAssociationTable", back_populates="user_group")
     
     #secondary relationships
-    members = relationship("UsersTable", secondary=user_group_members, back_populates="group_member")
+    assigned_task_groups = relationship("TaskGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_user_groups")
 
 
 class TasksTable(Base):
@@ -64,7 +92,8 @@ class TasksTable(Base):
     task_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     task_owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    task_owner = relationship("UsersTable", back_populates="tasks")
+    task_owner = relationship("UsersTable", back_populates="owned_tasks")
+    assigned_task_groups = relationship("TaskGroupsTable", secondary=task_assignments, back_populates="assigned_tasks")
 
 
 class TaskGroupsTable(Base):
@@ -76,4 +105,6 @@ class TaskGroupsTable(Base):
     group_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     group_owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    task_group_owner = relationship("UsersTable", back_populates="task_group")
+    group_owner = relationship("UsersTable", back_populates="owned_task_groups")
+    assigned_user_groups = relationship("UserGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_task_groups")
+    assigned_tasks = relationship("TasksTable", secondary=task_assignments, back_populates="assigned_task_groups")

@@ -29,7 +29,7 @@ def create_user(user: schemas.createUser, db: Session = Depends(database.get_db)
         return schemas.returnUser(operation="successful", user_details=user_details)
 
 
-@router.get("/me/", response_model=schemas.returnCurrentUser)
+@router.get("/me/", response_model=schemas.returnFullCurrentUserInformation)
 def get_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(database.get_db)):
     user = get_current_user(token=token, db=db) #This already handles inexistent user exceptions. No need for try except.
     return user
