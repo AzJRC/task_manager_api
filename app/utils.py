@@ -1,11 +1,16 @@
 from typing import Annotated
-from fastapi import Depends, status, HTTPException
-from sqlalchemy.orm import Session
 from jose import JWTError, jwt
+from fastapi import Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 from . import models, database
-from .auth import oauth2_scheme, ALGORITHM, SECRET_KEY, pwd_context
+from .auth import ALGORITHM, SECRET_KEY
 
 # current user utilities
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(database.get_db)):
     credentials_exception = HTTPException(
@@ -23,7 +28,6 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
     user = db.query(models.UsersTable).filter(models.UsersTable.username == username).one_or_none()
     if user is None:
         raise credentials_exception
-    del user.password #ensure user's password is not sent in any way
     return user
 
 

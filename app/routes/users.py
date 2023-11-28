@@ -3,7 +3,6 @@ from psycopg2 import IntegrityError
 from fastapi import Depends, status, HTTPException, APIRouter
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from ..auth import oauth2_scheme
 from ..utils import get_current_user, get_password_hash
 from .. import models, schemas, database
 
@@ -30,14 +29,12 @@ def create_user(user: schemas.createUser, db: Session = Depends(database.get_db)
 
 
 @router.get("/me/", response_model=schemas.returnFullCurrentUserInformation)
-def get_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(database.get_db)):
-    user = get_current_user(token=token, db=db) #This already handles inexistent user exceptions. No need for try except.
+def get_user(user = Depends(get_current_user)):
     return user
 
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(database.get_db)):
-    current_user = get_current_user(token=token, db=db) #This already handles inexistent user exceptions. No need for try except.
-    db.query(models.UsersTable).filter(models.UsersTable.id == current_user.id).delete()
+def delete_user(user = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    db.query(models.UsersTable).filter(models.UsersTable.id == user.id).delete()
     db.commit()
     

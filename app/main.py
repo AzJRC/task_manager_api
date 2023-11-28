@@ -1,11 +1,14 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from app.middlewares import add_process_time_header
 from . import models, database
 from .routes import tasks, users, login
 
-models.Base.metadata.create_all(bind=database.engine)
+
+# Now Alembic handle this
+# models.Base.metadata.create_all(bind=database.engine)
+
 
 app = FastAPI()
 

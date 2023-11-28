@@ -19,13 +19,13 @@ dec_base = declarative_base()
 #                            Column("role_id", Integer, ForeignKey("user_group_roles.id"), nullable=False))
 
 task_assignments = Table("task_assignments", Base.metadata,
-                         Column("task_id", Integer, ForeignKey("tasks.id"), primary_key=True),
-                         Column("task_group_id", Integer, ForeignKey("task_groups.id"), primary_key=True))
+                         Column("task_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
+                         Column("task_group_id", Integer, ForeignKey("task_groups.id", ondelete="CASCADE"), primary_key=True))
 
 
 user_groups_task_groups = Table("user_groups_task_groups", Base.metadata, 
-                                Column("user_group_id", Integer, ForeignKey("user_groups.id"), primary_key=True),
-                                Column("task_group_id", Integer, ForeignKey("task_groups.id"), primary_key=True))
+                                Column("user_group_id", Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), primary_key=True),
+                                Column("task_group_id", Integer, ForeignKey("task_groups.id", ondelete="CASCADE"), primary_key=True))
 
 
 class GroupRoles(Base):
@@ -40,9 +40,9 @@ class GroupRoles(Base):
 class UserGroupMembersAssociationTable(Base):
     __tablename__ = "user_group_members"
 
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    group_id = Column(Integer, ForeignKey("user_groups.id"), primary_key=True)
-    role_id = Column(Integer, ForeignKey("user_group_roles.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    group_id = Column(Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), primary_key=True)
+    role_id = Column(Integer, ForeignKey("user_group_roles.id", ondelete="CASCADE"), nullable=False)
 
     member = relationship("UsersTable", back_populates="groups_member")
     user_group = relationship("UserGroupsTable", back_populates="members")
@@ -50,6 +50,8 @@ class UserGroupMembersAssociationTable(Base):
 
 
 # Main tables
+
+delete_children_cascade="all, delete-orphan"
 class UsersTable(Base):
     __tablename__ = "users"
 
@@ -61,10 +63,10 @@ class UsersTable(Base):
     valid_email = Column(Boolean, nullable=False, server_default=text("FALSE"))  # email validation # user_state -> True: Active, False: Inactive (For irreversible user deletion)
     user_state = Column(Boolean, nullable=False, server_default=text("TRUE"))
 
-    owned_user_groups = relationship("UserGroupsTable", back_populates="group_owner")
-    groups_member = relationship("UserGroupMembersAssociationTable", back_populates="member")
-    owned_task_groups = relationship("TaskGroupsTable", back_populates="group_owner")
-    owned_tasks = relationship("TasksTable", back_populates="task_owner") 
+    owned_user_groups = relationship("UserGroupsTable", back_populates="group_owner", cascade=delete_children_cascade)
+    groups_member = relationship("UserGroupMembersAssociationTable", back_populates="member", cascade=delete_children_cascade)
+    owned_task_groups = relationship("TaskGroupsTable", back_populates="group_owner", cascade=delete_children_cascade)
+    owned_tasks = relationship("TasksTable", back_populates="task_owner", cascade=delete_children_cascade) 
 
 
 class UserGroupsTable(Base):
@@ -74,7 +76,7 @@ class UserGroupsTable(Base):
     group_name = Column(String, nullable=False, unique=True)
     group_description = Column(String, nullable=True)
     group_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
-    group_owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    group_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     group_owner = relationship("UsersTable", back_populates="owned_user_groups")
     members = relationship("UserGroupMembersAssociationTable", back_populates="user_group")
@@ -90,7 +92,7 @@ class TasksTable(Base):
     title = Column(String, nullable=False, unique=True)
     description = Column(String, nullable=True)
     task_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
-    task_owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    task_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     task_owner = relationship("UsersTable", back_populates="owned_tasks")
     assigned_task_groups = relationship("TaskGroupsTable", secondary=task_assignments, back_populates="assigned_tasks")
@@ -103,7 +105,7 @@ class TaskGroupsTable(Base):
     group_name = Column(String, nullable=False, unique=True)
     group_description = Column(String, nullable=True)
     group_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
-    group_owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    group_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     group_owner = relationship("UsersTable", back_populates="owned_task_groups")
     assigned_user_groups = relationship("UserGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_task_groups")

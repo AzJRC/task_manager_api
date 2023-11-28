@@ -1,9 +1,6 @@
 import datetime
-from typing import Any, ForwardRef, List, Optional
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr
-from .database import Base
-
-from app.models import UserGroupsTable, UsersTable
 
 # Token schemas (For login)
 
@@ -38,6 +35,30 @@ class returnTaskGroupInformation(BaseModel): # Schema of model TaskGroupsTable f
     group_creation: datetime.datetime
 
 
+# Task schemas
+
+class returnTaskOwner(BaseModel): # Schema of model UsersTable
+    username: str
+
+class createTask(BaseModel): # Schema of model TasksTable
+    title: str
+    description: Optional[str] = None
+
+class returnTask(BaseModel): # Schema of model TasksTable
+    id: int
+    title: str
+    description: str
+    task_creation: datetime.datetime
+    task_owner: returnTaskOwner
+
+class returnUserTask(BaseModel): # Schema of model TasksTable
+    id: int
+    title: str
+    description: str
+    task_creation: datetime.datetime
+
+    class Config:
+        from_attributes: True
 
 # User schemas
 
