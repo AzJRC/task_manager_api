@@ -39,3 +39,10 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
+
+# utils for tasks
+
+def get_title_standard(title: str):
+    standarized_title = title.replace("_", " ")
+    return standarized_title
