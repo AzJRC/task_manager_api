@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from app.middlewares import add_process_time_header
 from . import models, database
-from .routes import tasks, users, login
+from .routes import tasks, users, login, user_groups
 
 
 # Now Alembic handle this
@@ -37,3 +37,4 @@ async def root():
 app.include_router(users.router)
 app.include_router(login.router)
 app.include_router(tasks.router)
+app.include_router(user_groups.router)
