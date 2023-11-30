@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, EmailStr
 
 # Token schemas (For login)
@@ -18,9 +18,22 @@ class getTokenData(BaseModel):
     class Config:
         from_attributes: True
 
-
 # User groups schemas
 
+class getUserInformation(BaseModel):
+    username: str
+
+class getUserRoleInformation(BaseModel):
+    role: str
+
+class returnUserGroupMembers(BaseModel): # Schema of model UserGroupMembersAssociationTable for returnUserGroups schema
+    member: getUserInformation
+    user_role: getUserRoleInformation
+
+
+class getGroupMember(BaseModel):
+    username: str = None
+    role: str = None
 
 class createUserGroup(BaseModel): #Schema of model UserGroupsTable to create a user group
     group_name: str
@@ -30,9 +43,21 @@ class createUserGroup(BaseModel): #Schema of model UserGroupsTable to create a u
 class returnCreatedUserGroup(BaseModel): #Schema of model UserGroupsTable for recently created user group
     id: int
     group_name: str
-    group_description : Optional[str]
-    group_creation : datetime.datetime
+    group_description: Optional[str]
+    group_creation: datetime.datetime
 
+
+class returnUserGroups(BaseModel):
+    id: int
+    group_name: str
+    group_description: Optional[str]
+    group_creation: datetime.datetime
+    members_list: List[getGroupMember]
+
+
+class createUserGroupMember(BaseModel):
+    member_id: int
+    member_role: int
 
 class returnUserGroupInformation(BaseModel): #Schema of model UserGroupsTable for returnFullCurrentUserInformation schema
     id: int

@@ -42,7 +42,7 @@ class UserGroupMembersAssociationTable(Base):
 
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     group_id = Column(Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), primary_key=True)
-    role_id = Column(Integer, ForeignKey("user_group_roles.id", ondelete="CASCADE"), nullable=False)
+    role_id = Column(Integer, ForeignKey("user_group_roles.id", ondelete="CASCADE"), nullable=False, server_default=text("1"))
 
     member = relationship("UsersTable", back_populates="groups_member")
     user_group = relationship("UserGroupsTable", back_populates="members")
