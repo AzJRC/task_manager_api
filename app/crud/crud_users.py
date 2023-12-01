@@ -2,10 +2,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from app.utils import get_password_hash
-from .. import models, schemas
+from app import models
+from app.schemas import users_schm
 
 
-def create_user(db: Session, user: schemas.createUser):
+def create_user(db: Session, user: users_schm.CreateUser):
     hashed_password = get_password_hash(user.password)
     new_user = models.UsersTable(username=user.username, email=user.email, password=hashed_password)
     db.add(new_user)
@@ -26,8 +27,8 @@ def create_user(db: Session, user: schemas.createUser):
         )
     else:
         db.refresh(new_user)
-        user_details = schemas.userDetails(username=new_user.username, email=new_user.email)
-        return schemas.returnUser(operation="successful", user_details=user_details)
+        user_details = users_schm.GetUser(username=new_user.username, email=new_user.email, user_state=new_user.user_state)
+        return users_schm.ReturnUserDetails(operation="successful", user_details=user_details)
 
 
 def get_user(db: Session, user_id: int):

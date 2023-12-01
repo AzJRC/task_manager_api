@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
-from .. import models, schemas, exceptions
+from app import models, exceptions
+from app.schemas import tasks_schm
 
-
-def create_task(db: Session,  user_id: int, task: schemas.createTask):
+def create_task(db: Session,  user_id: int, task: tasks_schm.CreateTask):
     new_task = models.TasksTable(title=task.title, description=task.description, task_owner_id=user_id)
     db.add(new_task)
     try:
