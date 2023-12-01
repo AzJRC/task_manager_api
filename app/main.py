@@ -1,3 +1,4 @@
+import pytest
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -5,10 +6,8 @@ from app.middlewares import add_process_time_header
 from . import models, database
 from .routes import tasks, users, login, user_groups
 
-
 # Now Alembic handle this
 # models.Base.metadata.create_all(bind=database.engine)
-
 
 app = FastAPI()
 
@@ -28,9 +27,8 @@ app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)
 
 
 # routes
-
 @app.get("/")
-async def root():
+def root():
     return {"message": "Hello World"}
 
 
