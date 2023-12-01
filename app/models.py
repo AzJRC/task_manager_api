@@ -1,22 +1,7 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Table, text, Enum
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Table, text, Enum, event
 from sqlalchemy.orm import relationship, declarative_base
 from .database import Base
 
-
-dec_base = declarative_base()
-
-
-# Association tables
-
-# user_group_roles = Table("user_group_roles", Base.metadata,
-#                     Column("id", Integer, primary_key=True),
-#                     Column("role", String, nullable=False)) 
-
-
-# user_group_members = Table("user_group_members", Base.metadata, 
-#                            Column("user_id", Integer, ForeignKey("users.id"), primary_key=True), 
-#                            Column("group_id", Integer, ForeignKey("user_groups.id"), primary_key=True),
-#                            Column("role_id", Integer, ForeignKey("user_group_roles.id"), nullable=False))
 
 task_assignments = Table("task_assignments", Base.metadata,
                          Column("task_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
@@ -27,7 +12,6 @@ user_groups_task_groups = Table("user_groups_task_groups", Base.metadata,
                                 Column("user_group_id", Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), primary_key=True),
                                 Column("task_group_id", Integer, ForeignKey("task_groups.id", ondelete="CASCADE"), primary_key=True))
 
-
 class GroupRoles(Base):
     __tablename__ = "user_group_roles"
     
@@ -35,7 +19,6 @@ class GroupRoles(Base):
     role = Column(String, nullable=False)
 
     user = relationship("UserGroupMembersAssociationTable", back_populates="user_role")
-
 
 class UserGroupMembersAssociationTable(Base):
     __tablename__ = "user_group_members"

@@ -1,10 +1,19 @@
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from app import models, schemas, exceptions
+from app.database import get_db
 from app.schemas import user_groups_schm
 from . import crud_users
+
+
+def get_role_id(db: Session, role: str):
+    role = db.query(models.GroupRoles).filter(models.GroupRoles.role == role).one_or_none()
+    if not role:
+        raise exceptions.returnNotFound(item="Role")
+    return role.id
+
 
 def create_user_group(db: Session, user_id: int, user_group: user_groups_schm.CreateUserGroup):
     new_user_group = models.UserGroupsTable(group_name=user_group.group_name, 
@@ -23,7 +32,8 @@ def create_user_group(db: Session, user_id: int, user_group: user_groups_schm.Cr
     else:
         db.refresh(new_user_group)
         # add current user as the owner of the group
-        add_user_group_member(db, user_id, new_user_group.id, user_groups_schm.CreateUserGroupMember(member_id=user_id, member_role=4))
+        add_user_group_member(db, user_id, new_user_group.id, 
+                              user_groups_schm.CreateUserGroupMember(member_id=user_id, member_role=get_role_id(db, "owner")))
         return new_user_group
     
 
