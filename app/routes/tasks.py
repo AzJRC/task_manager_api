@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, status
 from sqlalchemy.orm import Session
 from app.crud import crud_tasks
 from app.utils import get_current_user
@@ -28,3 +28,12 @@ def get_specific_user_task(id_title: str, user: users_schm.GetUser = Depends(get
     if not task:
         raise exceptions.returnNotFound(item="Task")
     return task
+
+
+@router.delete("/{id_title}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(id_title: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    if id_title.isdigit():
+        crud_tasks.delete_task_by_id(db, int(id_title))
+    else:
+        crud_tasks.delete_task_by_title(db, id_title)
+    

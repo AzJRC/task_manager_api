@@ -48,6 +48,39 @@ def get_current_user_user_groups(db: Session, user_id: int):
     return user_groups
 
 
+def get_user_group_by_id(db: Session, user_id: int, group_id: int):
+    user_group = db.query(models.UserGroupsTable).\
+        filter(models.UserGroupsTable.group_owner_id == user_id,
+               models.UserGroupsTable.id == group_id).one_or_none()
+    if not user_group:
+        raise exceptions.returnNotFound(item="User group")
+    group_members = db.query(models.UsersTable.username, models.GroupRoles.role).\
+        join(models.UserGroupMembersAssociationTable, models.UserGroupMembersAssociationTable.user_id == models.UsersTable.id).\
+        join(models.GroupRoles, models.GroupRoles.id == models.UserGroupMembersAssociationTable.role_id).\
+        filter(models.UserGroupMembersAssociationTable.group_id == user_group.id).all()
+    user_group.members_list = group_members
+    return user_group
+
+
+def get_user_group_by_title(db: Session, user_id: int, group_title: str):
+    user_group = db.query(models.UserGroupsTable).\
+        filter(models.UserGroupsTable.group_owner_id == user_id,
+               models.UserGroupsTable.group_name == group_title).one_or_none()
+    if not user_group:
+        raise exceptions.returnNotFound(item="User group")
+    group_members = db.query(models.UsersTable.username, models.GroupRoles.role).\
+        join(models.UserGroupMembersAssociationTable, models.UserGroupMembersAssociationTable.user_id == models.UsersTable.id).\
+        join(models.GroupRoles, models.GroupRoles.id == models.UserGroupMembersAssociationTable.role_id).\
+        filter(models.UserGroupMembersAssociationTable.group_id == user_group.id).all()
+    user_group.members_list = group_members
+    return user_group
+
+# # =================================================== 
+# # Note:
+# # group_members query is duplicated.
+# # Create another function to aviod repetition
+# # ===================================================
+
 def delete_user_group(db: Session, user_id: int, group_id: int):
     db.query(models.UserGroupsTable).filter(models.UserGroupsTable.group_owner_id == user_id,
                                             models.UserGroupsTable.id == group_id).delete()

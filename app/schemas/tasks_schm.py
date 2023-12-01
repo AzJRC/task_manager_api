@@ -3,7 +3,6 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, EmailStr
 
 
-
 class CreateTask(BaseModel):
     title: str
     description: Optional[str] = None
