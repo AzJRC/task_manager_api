@@ -56,7 +56,7 @@ class UserGroupsTable(Base):
     __tablename__ = "user_groups"
 
     id = Column(Integer, primary_key=True, index=True)
-    group_name = Column(String, nullable=False, unique=True)
+    group_name = Column(String, nullable=False)
     group_description = Column(String, nullable=True)
     group_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     group_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
@@ -72,7 +72,7 @@ class TasksTable(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False, unique=True)
+    title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     task_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     task_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
@@ -85,7 +85,7 @@ class TaskGroupsTable(Base):
     __tablename__ = "task_groups" 
 
     id = Column(Integer, primary_key=True, index=True)
-    group_name = Column(String, nullable=False, unique=True)
+    group_name = Column(String, nullable=False)
     group_description = Column(String, nullable=True)
     group_creation = Column(DateTime(timezone=True), nullable=False, server_default=text("now()"))
     group_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)

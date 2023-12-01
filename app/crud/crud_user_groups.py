@@ -62,19 +62,6 @@ def get_user_group_by_id(db: Session, user_id: int, group_id: int):
     return user_group
 
 
-def get_user_group_by_title(db: Session, user_id: int, group_title: str):
-    user_group = db.query(models.UserGroupsTable).\
-        filter(models.UserGroupsTable.group_owner_id == user_id,
-               models.UserGroupsTable.group_name == group_title).one_or_none()
-    if not user_group:
-        raise exceptions.returnNotFound(item="User group")
-    group_members = db.query(models.UsersTable.username, models.GroupRoles.role).\
-        join(models.UserGroupMembersAssociationTable, models.UserGroupMembersAssociationTable.user_id == models.UsersTable.id).\
-        join(models.GroupRoles, models.GroupRoles.id == models.UserGroupMembersAssociationTable.role_id).\
-        filter(models.UserGroupMembersAssociationTable.group_id == user_group.id).all()
-    user_group.members_list = group_members
-    return user_group
-
 # # =================================================== 
 # # Note:
 # # group_members query is duplicated.
@@ -111,3 +98,13 @@ def add_user_group_member(db: Session, user_id: int, group_id: int, group_member
         db.refresh(user_group_member)
         return user_group_member
     
+
+def delete_user_group_member(db: Session, user_id: int, group_id: int, group_member_id: int):
+    user_group = db.query(models.UserGroupsTable).\
+        filter(models.UserGroupsTable.id == group_id, models.UserGroupsTable.group_owner_id == user_id).one_or_none()
+    if not user_group:
+        raise exceptions.returnNotFound(item="User group")
+    entry = db.query(models.UserGroupMembersAssociationTable).\
+        filter(models.UserGroupMembersAssociationTable.user_id == group_member_id, 
+               models.UserGroupMembersAssociationTable.group_id == group_id).delete()
+    db.commit()

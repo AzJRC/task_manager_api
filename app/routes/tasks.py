@@ -19,21 +19,15 @@ def get_user_tasks(title: str = "", description: str = "", user: users_schm.GetU
     return crud_tasks.get_current_user_tasks(db, user.id, title, description)
 
 
-@router.get("/{id_title}", response_model=tasks_schm.ReturnUserTask)
-def get_specific_user_task(id_title: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
-    if id_title.isdigit():
-        task = crud_tasks.get_task_by_id(db, user.id, int(id_title))
-    else:
-        task = crud_tasks.get_task_by_title(db, user.id, id_title)
+@router.get("/{id}/", response_model=tasks_schm.ReturnUserTask)
+def get_specific_user_task(id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    task = crud_tasks.get_task_by_id(db, user.id, int(id))
     if not task:
         raise exceptions.returnNotFound(item="Task")
     return task
 
 
-@router.delete("/{id_title}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(id_title: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
-    if id_title.isdigit():
-        crud_tasks.delete_task_by_id(db, int(id_title))
-    else:
-        crud_tasks.delete_task_by_title(db, id_title)
+@router.delete("/{id}/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud_tasks.delete_task_by_id(db, user.id, int(id))
     

@@ -12,6 +12,10 @@ def returnUnknownError():
     return ExceptionObj(status.HTTP_500_INTERNAL_SERVER_ERROR, "Something gone wrong.").return_exception()
 
 
+def returnBadRequest(item: str = "Item"):
+    return ExceptionObj(status.HTTP_403_FORBIDDEN, f"{item} could not been created. Incorrect request.").return_exception()
+
+
 def returnNotFound(item: str = "Item"):
     return ExceptionObj(status.HTTP_404_NOT_FOUND, f"{item} not found").return_exception()
 

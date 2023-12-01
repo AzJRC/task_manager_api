@@ -11,7 +11,8 @@ router = APIRouter(prefix="/user_groups", tags=["User Groups"])
 
 
 @router.post("/", response_model=user_groups_schm.ReturnCreatedUserGroup)
-def create_user_group(group: user_groups_schm.CreateUserGroup, user: users_schm.GetUser = Depends(get_current_user), 
+def create_user_group(group: user_groups_schm.CreateUserGroup, 
+                      user: users_schm.GetUser = Depends(get_current_user), 
                       db: Session = Depends(get_db)):
     return crud_user_groups.create_user_group(db, user.id, group)
 
@@ -25,17 +26,26 @@ def get_current_user_user_groups(user: users_schm.GetUser = Depends(get_current_
     return user_groups
 
 
-@router.get("/{group_id_title}", response_model=user_groups_schm.ReturnUserGroups)
-def get_specific_user_group(group_id_title: str, 
+@router.get("/{group_id}/", response_model=user_groups_schm.ReturnUserGroups)
+def get_specific_user_group(group_id: str, 
                             user: users_schm.GetUser = Depends(get_current_user), 
                             db: Session = Depends(get_db)):
-    if group_id_title.isdigit():
-        return crud_user_groups.get_user_group_by_id(db, user.id, int(group_id_title))
+    if group_id.isdigit():
+        return crud_user_groups.get_user_group_by_id(db, user.id, int(group_id))
     else:
-        return crud_user_groups.get_user_group_by_title(db, user.id, group_id_title)
+        raise exceptions.returnBadRequest(item="User group")
+
+@router.delete("/{group_id}/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_group(group_id: int, 
+                      user: users_schm.GetUser = Depends(get_current_user), 
+                      db: Session = Depends(get_db)):
+    crud_user_groups.delete_user_group(db, user.id, group_id)
 
 
-@router.post("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
+
+# User operations in user groups
+
+@router.post("/{group_id}/members/", status_code=status.HTTP_204_NO_CONTENT)
 def add_user_group_member(group_id: int, 
                           group_member: user_groups_schm.CreateUserGroupMember,
                           user: users_schm.GetUser = Depends(get_current_user), 
@@ -43,7 +53,13 @@ def add_user_group_member(group_id: int,
     crud_user_groups.add_user_group_member(db, user.id, group_id, group_member)
 
 
-@router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user_group(group_id: int, user: users_schm.GetUser = Depends(get_current_user), 
-                      db: Session = Depends(get_db)):
-    crud_user_groups.delete_user_group(db, user.id, group_id)
+# CHAGNES REQUIRED:
+# add_user_group_member should return a sucess response
+
+
+@router.delete("/{group_id}/members/{group_member_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user_group_member(group_id: int,
+                             group_member_id: int,
+                             user: users_schm.GetUser = Depends(get_current_user),
+                             db: Session = Depends(get_db)):
+    crud_user_groups.delete_user_group_member(db, user.id, group_id, group_member_id)

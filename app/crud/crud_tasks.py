@@ -26,22 +26,15 @@ def get_current_user_tasks(db: Session, user_id: int, title: str, description: s
                                               models.TasksTable.description.like("%{}%".format(description))).all()
 
 
-def delete_task_by_id(db: Session, task_id: int):
-    db.query(models.TasksTable).filter(models.TasksTable.id == task_id).delete()
+def delete_task_by_id(db: Session, user_id: int, task_id: int):
+    db.query(models.TasksTable).filter(models.TasksTable.task_owner_id == user_id, 
+                                       models.TasksTable.id == task_id).delete()
     db.commit()
 
-
-def delete_task_by_title(db: Session, task_title: str):
-    db.query(models.TasksTable).filter(models.TasksTable.title == task_title).delete()
-    db.commit()
 
 
 def get_task_by_id(db: Session, user_id: int, task_id: int):
     return db.query(models.TasksTable).filter(models.TasksTable.task_owner_id == user_id, 
                                               models.TasksTable.id == task_id).one_or_none()
 
-
-def get_task_by_title(db: Session, user_id: int, task_title: str):
-    return db.query(models.TasksTable).filter(models.TasksTable.task_owner_id == user_id, 
-                                              models.TasksTable.title == task_title).one_or_none()
 
