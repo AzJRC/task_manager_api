@@ -1,14 +1,14 @@
 import datetime
 from typing import List, Optional, Union
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
-class CreateUserGroup(BaseModel): #Schema of model UserGroupsTable to create a user group
+class CreateUserGroup(BaseModel): 
     group_name: str
     group_description: Optional[str] = None
 
 
-class ReturnCreatedUserGroup(BaseModel): #Schema of model UserGroupsTable for recently created user group
+class ReturnCreatedUserGroup(BaseModel):
     id: int
     group_name: str
     group_description: Optional[str]
@@ -29,4 +29,4 @@ class ReturnUserGroups(BaseModel):
 
 class CreateUserGroupMember(BaseModel):
     member_id: int
-    member_role: int
+    member_role: int = Field(..., ge=1, le=4)

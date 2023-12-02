@@ -82,6 +82,8 @@ def add_user_group_member(db: Session, user_id: int, group_id: int, group_member
         raise exceptions.returnNotFound(item="User group")
     #verify user member exists
     new_member = crud_users.get_user(db, group_member.member_id)
+    if not new_member:
+        raise exceptions.returnNotFound(item="User")
     #Add member to the association table
     user_group_member = models.UserGroupMembersAssociationTable(user_id=new_member.id, group_id=group_id, role_id=group_member.member_role)
     db.add(user_group_member)

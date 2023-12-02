@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Table, text, Enum, event
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Table, UniqueConstraint, text, Enum, event
 from sqlalchemy.orm import relationship, declarative_base
 from .database import Base
 
@@ -67,6 +67,10 @@ class UserGroupsTable(Base):
     #secondary relationships
     assigned_task_groups = relationship("TaskGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_user_groups")
 
+    __table_args__ = (
+        UniqueConstraint('group_owner_id', 'group_name'),
+    )
+
 
 class TasksTable(Base):
     __tablename__ = "tasks"
@@ -79,6 +83,10 @@ class TasksTable(Base):
 
     task_owner = relationship("UsersTable", back_populates="owned_tasks")
     assigned_task_groups = relationship("TaskGroupsTable", secondary=task_assignments, back_populates="assigned_tasks")
+
+    __table_args__ = (
+        UniqueConstraint('task_owner_id', 'title'),
+    )
 
 
 class TaskGroupsTable(Base):
@@ -93,3 +101,7 @@ class TaskGroupsTable(Base):
     group_owner = relationship("UsersTable", back_populates="owned_task_groups")
     assigned_user_groups = relationship("UserGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_task_groups")
     assigned_tasks = relationship("TasksTable", secondary=task_assignments, back_populates="assigned_task_groups")
+
+    __table_args__ = (
+        UniqueConstraint('group_owner_id', 'group_name'),
+    )
