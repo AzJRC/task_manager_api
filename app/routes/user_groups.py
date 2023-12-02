@@ -43,7 +43,7 @@ def delete_user_group(group_id: int,
 
 
 
-# User operations in user groups
+# User operations in user groups | Route: /user_groups/{group_id}/members/...
 
 @router.post("/{group_id}/members/", status_code=status.HTTP_204_NO_CONTENT)
 def add_user_group_member(group_id: int, 

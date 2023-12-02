@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.crud import crud_tasks
 from app.utils import get_current_user
 from app.database import get_db
-from app.schemas import tasks_schm, users_schm
+from app.schemas import tasks_schm, task_groups_schm, users_schm
 from app import exceptions
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
@@ -30,4 +30,22 @@ def get_specific_user_task(id: str, user: users_schm.GetUser = Depends(get_curre
 @router.delete("/{id}/", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task(id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
     crud_tasks.delete_task_by_id(db, user.id, int(id))
-    
+
+
+
+# Task group operations in tasks | Route: /tasks/{task_id}/task_groups/...
+
+@router.post("/{task_id}/task_groups", status_code=status.HTTP_204_NO_CONTENT)
+def assign_task_task_group(task_id: int, 
+                           task_group: task_groups_schm.assignTaskToTaskGroup, 
+                           user: users_schm.GetUser = Depends(get_current_user), 
+                           db: Session = Depends(get_db)):
+    crud_tasks.assign_task_task_group(db, user.id, task_id, task_group)
+
+
+@router.delete("/{task_id}/task_groups/{task_group_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task_task_group_assignment(task_id: int, 
+                                      task_group_id: int, 
+                                      user: users_schm.GetUser = Depends(get_current_user), 
+                                      db: Session = Depends(get_db)):
+    crud_tasks.delete_task_task_group_assignment(db, user.id, task_id, task_group_id)

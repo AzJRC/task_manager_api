@@ -3,14 +3,16 @@ from sqlalchemy.orm import relationship, declarative_base
 from .database import Base
 
 
-task_assignments = Table("task_assignments", Base.metadata,
-                         Column("task_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True),
-                         Column("task_group_id", Integer, ForeignKey("task_groups.id", ondelete="CASCADE"), primary_key=True))
+# Association tables
+class TaskAssignmentsAssociationTable(Base):
+    __tablename__ = "task_assignments"
 
+    task_id = Column("task_id", Integer, ForeignKey("tasks.id", ondelete="CASCADE"), primary_key=True)
+    task_group_id = Column("task_group_id", Integer, ForeignKey("task_groups.id", ondelete="CASCADE"), primary_key=True)
 
-user_groups_task_groups = Table("user_groups_task_groups", Base.metadata, 
-                                Column("user_group_id", Integer, ForeignKey("user_groups.id", ondelete="CASCADE"), primary_key=True),
-                                Column("task_group_id", Integer, ForeignKey("task_groups.id", ondelete="CASCADE"), primary_key=True))
+    tasks = relationship("TasksTable", back_populates="assigned_task_groups")
+    task_groups = relationship("TaskGroupsTable", back_populates="assigned_tasks")
+
 
 class GroupRoles(Base):
     __tablename__ = "user_group_roles"
@@ -63,9 +65,6 @@ class UserGroupsTable(Base):
 
     group_owner = relationship("UsersTable", back_populates="owned_user_groups")
     members = relationship("UserGroupMembersAssociationTable", back_populates="user_group")
-    
-    #secondary relationships
-    assigned_task_groups = relationship("TaskGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_user_groups")
 
     __table_args__ = (
         UniqueConstraint('group_owner_id', 'group_name'),
@@ -82,7 +81,8 @@ class TasksTable(Base):
     task_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     task_owner = relationship("UsersTable", back_populates="owned_tasks")
-    assigned_task_groups = relationship("TaskGroupsTable", secondary=task_assignments, back_populates="assigned_tasks")
+    assigned_task_groups = relationship("TaskAssignmentsAssociationTable", back_populates="tasks", cascade=delete_children_cascade)
+    
 
     __table_args__ = (
         UniqueConstraint('task_owner_id', 'title'),
@@ -99,8 +99,8 @@ class TaskGroupsTable(Base):
     group_owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     group_owner = relationship("UsersTable", back_populates="owned_task_groups")
-    assigned_user_groups = relationship("UserGroupsTable", secondary=user_groups_task_groups, back_populates="assigned_task_groups")
-    assigned_tasks = relationship("TasksTable", secondary=task_assignments, back_populates="assigned_task_groups")
+    assigned_tasks = relationship("TaskAssignmentsAssociationTable", back_populates="task_groups", cascade=delete_children_cascade)
+    
 
     __table_args__ = (
         UniqueConstraint('group_owner_id', 'group_name'),
