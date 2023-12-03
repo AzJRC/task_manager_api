@@ -25,8 +25,12 @@ def delete_task_group(group_id: int,
 
 
 @router.get("/", response_model=List[task_groups_schm.returnTaskGroup])
-def get_current_user_task_groups(db: Session = Depends(get_db), user: users_schm.GetUser = Depends(get_current_user)):
-    return crud_taks_groups.get_current_user_task_groups(db, user.id)
+def get_current_user_task_groups(db: Session = Depends(get_db), 
+                                 user: users_schm.GetUser = Depends(get_current_user)):
+    task_groups = crud_taks_groups.get_current_user_task_groups(db, user.id)
+    if not task_groups:
+        return []
+    return task_groups
 
 
 @router.get("/{group_id}", response_model=task_groups_schm.returnTaskGroup)

@@ -22,13 +22,16 @@ class ReturnCreatedTaskGroup(BaseModel):
     group_description: Optional[str]
     group_creation: datetime.datetime
 
-
-class TmpAssignedDetails(BaseModel):
-    task_id: int
+class GetAssignedTask(BaseModel):
+    id: int
+    title: str
 
 class returnTaskGroup(BaseModel):
     id: int
     group_name: str
     group_description: Optional[str]
     group_creation: datetime.datetime
-    assigned_tasks: List[TmpAssignedDetails]
+    tasks: List[GetAssignedTask]
+
+    class Config:
+        from_attributes: True

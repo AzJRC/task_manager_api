@@ -16,8 +16,8 @@ class ReturnCreatedUserGroup(BaseModel):
 
 
 class GetGroupMember(BaseModel):
-    username: str = None
-    role: str = None
+    username: str 
+    role: str 
 
 class ReturnUserGroups(BaseModel):
     id: int
@@ -25,6 +25,9 @@ class ReturnUserGroups(BaseModel):
     group_description: Optional[str]
     group_creation: datetime.datetime
     members_list: List[GetGroupMember]
+
+    class Config:
+        from_attributes: True
 
 
 class CreateUserGroupMember(BaseModel):

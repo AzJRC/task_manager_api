@@ -33,7 +33,13 @@ def delete_task_group(db: Session, user_id: int, task_group_id: int):
 
 
 def get_current_user_task_groups(db: Session, user_id: int):
-    return db.query(models.TaskGroupsTable).filter(models.TaskGroupsTable.group_owner_id == user_id).all()
+    task_groups = db.query(models.TaskGroupsTable).filter(models.TaskGroupsTable.group_owner_id == user_id).all()
+    for task_group in task_groups:
+        tasks = db.query(models.TasksTable.id, models.TasksTable.title).\
+            join(models.TaskAssignmentsAssociationTable, models.TaskAssignmentsAssociationTable.task_id == models.TasksTable.id).\
+            filter(models.TaskAssignmentsAssociationTable.task_group_id == task_group.id).all()
+        task_group.tasks = tasks
+    return task_groups
 
 
 def get_specific_task_group(db: Session, user_id: int, task_group_id: int):
