@@ -19,17 +19,17 @@ def get_user_tasks(title: str = "", description: str = "", user: users_schm.GetU
     return crud_tasks.get_current_user_tasks(db, user.id, title, description)
 
 
-@router.get("/{id}/", response_model=tasks_schm.ReturnUserTask)
-def get_specific_user_task(id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
-    task = crud_tasks.get_task_by_id(db, user.id, int(id))
+@router.get("/{task_id}/", response_model=tasks_schm.ReturnUserTask)
+def get_specific_user_task(task_id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    task = crud_tasks.get_task_by_id(db, user.id, int(task_id))
     if not task:
         raise exceptions.returnNotFound(item="Task")
     return task
 
 
-@router.delete("/{id}/", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
-    crud_tasks.delete_task_by_id(db, user.id, int(id))
+@router.delete("/{task_id}/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: str, user: users_schm.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    crud_tasks.delete_task_by_id(db, user.id, int(task_id))
 
 
 
@@ -43,9 +43,9 @@ def assign_task_task_group(task_id: int,
     crud_tasks.assign_task_task_group(db, user.id, task_id, task_group)
 
 
-@router.delete("/{task_id}/task_groups/{task_group_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{task_id}/task_groups/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task_task_group_assignment(task_id: int, 
-                                      task_group_id: int, 
+                                      group_id: int, 
                                       user: users_schm.GetUser = Depends(get_current_user), 
                                       db: Session = Depends(get_db)):
-    crud_tasks.delete_task_task_group_assignment(db, user.id, task_id, task_group_id)
+    crud_tasks.delete_task_task_group_assignment(db, user.id, task_id, group_id)

@@ -57,9 +57,9 @@ def add_user_group_member(group_id: int,
 # add_user_group_member should return a sucess response
 
 
-@router.delete("/{group_id}/members/{group_member_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{group_id}/members/{member_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_group_member(group_id: int,
-                             group_member_id: int,
+                             member_id: int,
                              user: users_schm.GetUser = Depends(get_current_user),
                              db: Session = Depends(get_db)):
-    crud_user_groups.delete_user_group_member(db, user.id, group_id, group_member_id)
+    crud_user_groups.delete_user_group_member(db, user.id, group_id, member_id)
