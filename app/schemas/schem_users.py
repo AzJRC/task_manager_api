@@ -3,16 +3,10 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, EmailStr
 
 
-class CreateUser(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    
-    class Config:
-        from_attributes: True
-
+# In-code schemas (get)
 
 class GetUser(BaseModel):
+    id: int
     username: str
     email: EmailStr 
     user_state: bool
@@ -21,7 +15,19 @@ class GetUser(BaseModel):
         from_attributes: True
 
 
-class GetCurrentUser(BaseModel):
+# Request schemas (create/update/asssign)
+
+class CreateUser(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+    
+    class Config:
+        from_attributes: True
+
+# Response schemas (return)
+
+class ReturnCurrentUser(BaseModel):
     id: int
     username: str
     email: EmailStr
@@ -39,5 +45,11 @@ class ReturnUserDetails(BaseModel):
 
     class Config:
         from_attributes: True
+
+
+
+
+
+
 
 

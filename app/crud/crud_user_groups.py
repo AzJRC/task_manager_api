@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import Depends, HTTPException, status
 from app import models, schemas, exceptions
 from app.database import get_db
-from app.schemas import user_groups_schm
+from app.schemas import schem_user_groups
 from . import crud_users
 
 
@@ -15,7 +15,7 @@ def get_role_id(db: Session, role: str):
     return role.id
 
 
-def create_user_group(db: Session, user_id: int, user_group: user_groups_schm.CreateUserGroup):
+def create_user_group(db: Session, user_id: int, user_group: schem_user_groups.CreateUserGroup):
     new_user_group = models.UserGroupsTable(group_name=user_group.group_name, 
                                             group_description=user_group.group_description, 
                                             group_owner_id=user_id)
@@ -23,17 +23,15 @@ def create_user_group(db: Session, user_id: int, user_group: user_groups_schm.Cr
     try:
         db.commit()
     except Exception as e:
-        print(e)
+        db.rollback()
         if isinstance(e, IntegrityError):
             raise exceptions.returnIntegrityError(item="User group")
         print(e)
-        db.rollback()
         raise exceptions.returnUnknownError()
     else:
         db.refresh(new_user_group)
-        # add current user as the owner of the group
         add_user_group_member(db, user_id, new_user_group.id, 
-                              user_groups_schm.CreateUserGroupMember(member_id=user_id, member_role=get_role_id(db, "owner")))
+                              schem_user_groups.CreateUserGroupMember(member_id=user_id, member_role=get_role_id(db, "owner")))
         return new_user_group
     
 
@@ -74,7 +72,7 @@ def delete_user_group(db: Session, user_id: int, group_id: int):
     db.commit()
 
 
-def add_user_group_member(db: Session, user_id: int, group_id: int, group_member: user_groups_schm.CreateUserGroupMember):
+def add_user_group_member(db: Session, user_id: int, group_id: int, group_member: schem_user_groups.CreateUserGroupMember):
     # Verify that your group exists and you are the owner
     user_group = db.query(models.UserGroupsTable).\
         filter(models.UserGroupsTable.id == group_id, models.UserGroupsTable.group_owner_id == user_id).one_or_none()
@@ -90,11 +88,10 @@ def add_user_group_member(db: Session, user_id: int, group_id: int, group_member
     try:
         db.commit()
     except Exception as e:
-        print(e)
+        db.rollback()
         if isinstance(e, IntegrityError):
             raise exceptions.returnIntegrityError(item="Group member")
         print(e)
-        db.rollback()
         raise exceptions.returnUnknownError()
     else:
         db.refresh(user_group_member)

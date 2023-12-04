@@ -1,19 +1,19 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
 from app import models, exceptions
-from app.schemas import tasks_schm, task_groups_schm
+from app.crud import crud_taks_groups
+from app.schemas import schem_tasks, schem_task_groups
 
-def create_task(db: Session,  user_id: int, task: tasks_schm.CreateTask):
+def create_task(db: Session,  user_id: int, task: schem_tasks.CreateTask):
     new_task = models.TasksTable(title=task.title, description=task.description, task_owner_id=user_id)
     db.add(new_task)
     try:
         db.commit()
     except Exception as e:
+        db.rollback()
         if isinstance(e, IntegrityError):
             raise exceptions.returnIntegrityError(item="Task")
         print(e)
-        db.rollback()
         raise exceptions.returnUnknownError()
     else:
         db.refresh(new_task)
@@ -38,40 +38,23 @@ def get_task_by_id(db: Session, user_id: int, task_id: int):
                                               models.TasksTable.id == task_id).one_or_none()
 
 
-def assign_task_task_group(db: Session, user_id: int, task_id: int, task_group: task_groups_schm.assignTaskToTaskGroup):
-    if not task_group.group_id:
-        search_task_group = db.query(models.TaskGroupsTable).\
-            filter(models.TaskGroupsTable.group_owner_id == task_group.group_owner_id,
-                   models.TaskGroupsTable.group_name == task_group.group_name).one_or_none()
-        if not search_task_group:
-            raise exceptions.returnNotFound("Task group")
-        task_group.group_id = search_task_group.id
-    new_task_assignment = models.TaskAssignmentsAssociationTable(task_id=task_id, task_group_id=task_group.group_id)
+def assign_task_to_task_group(db: Session, user_id: int, task_id: int, task_group_id: int):
+    #verify you are the owner of the task_group and the task
+    task = get_task_by_id(db, user_id, task_id)
+    if not task:
+        raise exceptions.returnNotFound("Task")
+    task_group = crud_taks_groups.get_specific_task_group(db, user_id, task_group_id)
+    if not task_group:
+        raise exceptions.returnNotFound("Task group")
+    new_task_assignment = models.TaskAssignmentsAssociationTable(task_id=task_id, task_group_id=task_group_id)
     db.add(new_task_assignment)
     try:
         db.commit()
     except Exception as e:
-        if isinstance(e, IntegrityError):
-            raise exceptions.returnIntegrityError(item="Task assignment")
-        print(e)
         db.rollback()
+        if isinstance(e, IntegrityError):
+            raise exceptions.returnIntegrityError(item="Task")
+        print(e)
         raise exceptions.returnUnknownError()
     else:
         db.refresh(new_task_assignment)
-        return new_task_assignment
-    
-
-def delete_task_task_group_assignment(db: Session, user_id: int, task_id: int, task_group_id: int):
-    task_assignment = db.query(models.TaskAssignmentsAssociationTable,
-             models.TaskGroupsTable.group_owner_id).\
-        join(models.TaskGroupsTable, models.TaskGroupsTable.id == task_group_id).\
-        filter(models.TaskAssignmentsAssociationTable.task_id == task_id,
-               models.TaskAssignmentsAssociationTable.task_group_id == task_group_id,
-               models.TaskGroupsTable.group_owner_id == user_id).one_or_none()
-    if not task_assignment:
-        raise exceptions.returnNotFound("Task assignment")
-    db.query(models.TaskAssignmentsAssociationTable).\
-        filter(models.TaskAssignmentsAssociationTable.task_id == task_id,
-               models.TaskAssignmentsAssociationTable.task_group_id == task_group_id).delete()
-    db.commit()
-    

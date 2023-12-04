@@ -21,4 +21,4 @@ def returnNotFound(item: str = "Item"):
 
 
 def returnIntegrityError(item: str = "Item"):
-    return ExceptionObj(status.HTTP_403_FORBIDDEN, f"{item} could not been created due to an integrity error. Maybe the item is already created.").return_exception()
+    return ExceptionObj(status.HTTP_403_FORBIDDEN, f"{item} could not been created due to an integrity error.").return_exception()
