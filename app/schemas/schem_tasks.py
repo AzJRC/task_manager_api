@@ -11,6 +11,10 @@ class CreateTask(BaseModel):
     title: str
     description: Optional[str] = None
 
+class UpdateTask(BaseModel):
+    title: str
+    description: Optional[str] = None
+
 
 # Response schemas (return)
 

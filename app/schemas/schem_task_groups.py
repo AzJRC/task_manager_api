@@ -15,6 +15,11 @@ class GetAssignedTask(BaseModel):
 class CreateTaskGroup(BaseModel):
     group_name: str
     group_description: Optional[str] = None
+
+
+class UpdateTaskGroup(BaseModel):
+    group_name: str
+    group_description: Optional[str] = None
     
 
 # Response schemas (return)

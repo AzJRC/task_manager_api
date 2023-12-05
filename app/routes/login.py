@@ -21,6 +21,6 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessio
             headers={"WWW-Authenticate": "Bearer"},
         ) 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires)
+    access_token_data = {"sub": user.username}
+    access_token = create_access_token(data=access_token_data, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}

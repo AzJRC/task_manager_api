@@ -16,6 +16,11 @@ class CreateUserGroup(BaseModel):
     group_description: Optional[str] = None
 
 
+class UpdateUserGroup(BaseModel):
+    group_name: str
+    group_description: Optional[str] = None
+    
+    
 class CreateUserGroupMember(BaseModel):
     member_id: int
     member_role: int = Field(..., ge=1, le=4)

@@ -42,9 +42,6 @@ def delete_user_group(group_id: int,
     crud_user_groups.delete_user_group(db, user.id, group_id)
 
 
-
-# User operations in user groups | Route: /user_groups/{group_id}/members/...
-
 @router.post("/{group_id}/members/", status_code=status.HTTP_204_NO_CONTENT)
 def add_user_group_member(group_id: int, 
                           group_member: schem_user_groups.CreateUserGroupMember,
@@ -52,15 +49,14 @@ def add_user_group_member(group_id: int,
                           db: Session = Depends(get_db)):
     crud_user_groups.add_user_group_member(db, user.id, group_id, group_member)
 
-
 # ============================================================
 # add_user_group_member should return a sucess response
 # ============================================================
 
 
 @router.delete("/{group_id}/members/{member_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user_group_member(group_id: int,
+def remove_user_group_member(group_id: int,
                              member_id: int,
                              user: schem_users.GetUser = Depends(get_current_user),
                              db: Session = Depends(get_db)):
-    crud_user_groups.delete_user_group_member(db, user.id, group_id, member_id)
+    crud_user_groups.remove_user_group_member(db, user.id, group_id, member_id)

@@ -14,6 +14,13 @@ def create_user_endpoint(user: schem_users.CreateUser, db: Session = Depends(get
     return crud_users.create_user(db, user)
 
 
+@router.put("/me/", response_model=schem_users.ReturnUserDetails)
+def update_user(updated_user: schem_users.UpdateUser, 
+                user: schem_users.GetUser = Depends(get_current_user), 
+                db: Session = Depends(get_db)):
+    return crud_users.update_user(db, user.id, updated_user)
+
+
 @router.get("/me/", response_model=schem_users.ReturnCurrentUser)
 def get_user_endpoint(user: schem_users.GetUser = Depends(get_current_user)):
     return user

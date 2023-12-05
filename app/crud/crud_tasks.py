@@ -26,16 +26,36 @@ def get_current_user_tasks(db: Session, user_id: int, title: str, description: s
                                               models.TasksTable.description.like("%{}%".format(description))).all()
 
 
+
+def get_task_by_id(db: Session, user_id: int, task_id: int):
+    return db.query(models.TasksTable).filter(models.TasksTable.task_owner_id == user_id, 
+                                              models.TasksTable.id == task_id).one_or_none()
+
+
+def update_task(db: Session, user_id: int, task_id: int, task: schem_tasks.UpdateTask):
+    task_to_update = db.query(models.TasksTable).filter(models.TasksTable.id == task_id, 
+                                       models.TasksTable.task_owner_id == user_id).one_or_none()
+    if not task_to_update:
+        raise exceptions.returnNotFound(item="Task")
+    task_to_update.title = task.title
+    task_to_update.description = task.description
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise exceptions.returnUnknownError()
+    return task_to_update
+
+
 def delete_task_by_id(db: Session, user_id: int, task_id: int):
     db.query(models.TasksTable).filter(models.TasksTable.task_owner_id == user_id, 
                                        models.TasksTable.id == task_id).delete()
     db.commit()
 
 
-
-def get_task_by_id(db: Session, user_id: int, task_id: int):
-    return db.query(models.TasksTable).filter(models.TasksTable.task_owner_id == user_id, 
-                                              models.TasksTable.id == task_id).one_or_none()
+# ===================================
+# TASK GROUP ACTIONS IN TASK ENDPOINT
+# ===================================
 
 
 def assign_task_to_task_group(db: Session, user_id: int, task_id: int, task_group_id: int):

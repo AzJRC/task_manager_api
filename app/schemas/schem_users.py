@@ -6,7 +6,6 @@ from pydantic import BaseModel, EmailStr
 # In-code schemas (get)
 
 class GetUser(BaseModel):
-    id: int
     username: str
     email: EmailStr 
     user_state: bool
@@ -21,7 +20,16 @@ class CreateUser(BaseModel):
     username: str
     email: EmailStr
     password: str
-    
+
+    class Config:
+        from_attributes: True
+
+
+class UpdateUser(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
     class Config:
         from_attributes: True
 

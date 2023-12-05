@@ -20,14 +20,6 @@ def create_task_group(db: Session, user_id: int, task_group: schem_task_groups.C
     else:
         db.refresh(new_task_group)
         return new_task_group
-    
-
-def delete_task_group(db: Session, user_id: int, task_group_id: int):
-    task_group = db.query(models.TaskGroupsTable).\
-        filter(models.TaskGroupsTable.id == task_group_id, models.TaskGroupsTable.group_owner_id == user_id).delete()
-    if not task_group:
-        raise exceptions.returnNotFound(item="Task group")
-    db.commit()
 
 
 def get_current_user_task_groups(db: Session, user_id: int):
@@ -50,6 +42,34 @@ def get_specific_task_group(db: Session, user_id: int, task_group_id: int):
             filter(models.TaskAssignmentsAssociationTable.task_group_id == task_group.id).all()
     task_group.tasks = tasks
     return task_group
+
+
+def update_task_group(db: Session, user_id: int, task_group_id: int, updated_task_group: schem_task_groups.UpdateTaskGroup):
+    task_group = db.query(models.TaskGroupsTable).\
+        filter(models.TaskGroupsTable.id == task_group_id, models.TaskGroupsTable.group_owner_id == user_id).one_or_none()
+    if not task_group:
+        raise exceptions.returnNotFound("Task group")
+    task_group.group_name = updated_task_group.group_name
+    task_group.group_description = updated_task_group.group_description
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise exceptions.returnUnknownError()
+    return task_group
+
+
+def delete_task_group(db: Session, user_id: int, task_group_id: int):
+    task_group = db.query(models.TaskGroupsTable).\
+        filter(models.TaskGroupsTable.id == task_group_id, models.TaskGroupsTable.group_owner_id == user_id).delete()
+    if not task_group:
+        raise exceptions.returnNotFound(item="Task group")
+    db.commit()
+
+
+# ===================================
+# TASK ACTIONS IN TASK GROUP ENDPOINT
+# ===================================
 
 
 def create_task_in_task_group(db: Session, user_id: int, task_group_id: int, task: schem_tasks.CreateTask):

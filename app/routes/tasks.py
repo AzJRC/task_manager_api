@@ -10,12 +10,17 @@ from app import exceptions
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 @router.post("/", response_model=schem_tasks.ReturnUserTask)
-def create_task(task: schem_tasks.CreateTask, user: schem_users.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_task(task: schem_tasks.CreateTask, 
+                user: schem_users.GetUser = Depends(get_current_user), 
+                db: Session = Depends(get_db)):
     return crud_tasks.create_task(db, user.id, task)
 
 
 @router.get("/", response_model=List[schem_tasks.ReturnUserTask])
-def get_current_user_tasks(title: str = "", description: str = "", user: schem_users.GetUser = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_current_user_tasks(title: str = "", 
+                           description: str = "", 
+                           user: schem_users.GetUser = Depends(get_current_user), 
+                           db: Session = Depends(get_db)):
     return crud_tasks.get_current_user_tasks(db, user.id, title, description)
 
 
@@ -25,6 +30,14 @@ def get_task_by_id(task_id: str, user: schem_users.GetUser = Depends(get_current
     if not task:
         raise exceptions.returnNotFound(item="Task")
     return task
+
+
+@router.put("/{task_id}/", response_model=schem_tasks.ReturnUserTask)
+def update_task(task_id: int, 
+                task: schem_tasks.UpdateTask, 
+                user: schem_users.GetUser = Depends(get_current_user), 
+                db: Session = Depends(get_db)):
+    return crud_tasks.update_task(db, user.id, task_id, task)
 
 
 @router.delete("/{task_id}/", status_code=status.HTTP_204_NO_CONTENT)

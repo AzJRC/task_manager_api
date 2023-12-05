@@ -17,6 +17,14 @@ def create_task_group(group: schem_task_groups.CreateTaskGroup,
     return crud_taks_groups.create_task_group(db, user.id, group)
 
 
+@router.put("/{group_id}", response_model=schem_task_groups.ReturnCreatedTaskGroup)
+def update_task_group(group_id: int, 
+                      group: schem_task_groups.UpdateTaskGroup,
+                      db: Session = Depends(get_db), 
+                      user: schem_users.GetUser = Depends(get_current_user)):
+    return crud_taks_groups.update_task_group(db, user.id, group_id, group)
+
+
 @router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_task_group(group_id: int, 
                       db: Session = Depends(get_db), 
