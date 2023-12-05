@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from app.middlewares import add_process_time_header
 from . import models, database
-from .routes import tasks, users, login, user_groups, task_groups
+from .routes import tasks, users, login, task_groups
 
 # Now Alembic handle this
 # models.Base.metadata.create_all(bind=database.engine)
@@ -35,5 +35,4 @@ def root():
 app.include_router(users.router)
 app.include_router(login.router)
 app.include_router(tasks.router)
-app.include_router(user_groups.router)
 app.include_router(task_groups.router)
